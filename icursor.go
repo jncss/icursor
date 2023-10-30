@@ -14,11 +14,10 @@ type icNode struct {
 
 type icKey struct {
 	name string
-	kind reflect.Kind
 	desc bool
 }
 type iCursor struct {
-	l    []icNode
+	list []icNode
 	keys []icKey
 	curr int64
 }
@@ -35,7 +34,7 @@ func NewICursor(data any, keys string) *iCursor {
 		panic("Data elements must be structs")
 	}
 
-	// create a new cursor and fill it with the data
+	// create a new cursor and fill it with the keys
 	c := new(iCursor)
 	c.curr = -1
 	// keys are comma separated field names
@@ -54,25 +53,24 @@ func NewICursor(data any, keys string) *iCursor {
 		c.keys = append(c.keys,
 			icKey{
 				name: v,
-				kind: reflect.ValueOf(data).Index(0).FieldByName(v).Kind(),
 				desc: desc,
 			})
 
 	}
 
 	// fill the cursor
-	c.l = make([]icNode, reflect.ValueOf(data).Len())
+	c.list = make([]icNode, reflect.ValueOf(data).Len())
 	for i := 0; i < reflect.ValueOf(data).Len(); i++ {
-		c.l[i].key = make([]any, len(c.keys))
+		c.list[i].key = make([]any, len(c.keys))
 		for j, v := range c.keys {
-			c.l[i].key[j] = reflect.ValueOf(data).Index(i).FieldByName(v.name).Interface()
+			c.list[i].key[j] = reflect.ValueOf(data).Index(i).FieldByName(v.name).Interface()
 		}
-		c.l[i].index = int64(i)
+		c.list[i].index = int64(i)
 	}
 
 	// sort the cursor
-	sort.Slice(c.l, func(i, j int) bool {
-		return c.less(c.l[i].key, c.l[j].key)
+	sort.Slice(c.list, func(i, j int) bool {
+		return c.less(c.list[i].key, c.list[j].key)
 	})
 
 	return c
@@ -304,12 +302,12 @@ func (c *iCursor) less(key1, key2 []any) bool {
 
 // Len returns the number of elements in the cursor
 func (c *iCursor) Len() int {
-	return len(c.l)
+	return len(c.list)
 }
 
 // Println prints the cursor
 func (c *iCursor) Println() {
-	for _, v := range c.l {
+	for _, v := range c.list {
 		fmt.Println(v.key, v.index)
 	}
 }
@@ -318,16 +316,16 @@ func (c *iCursor) Println() {
 func (c *iCursor) Find(key []any) int64 {
 	// binary search
 	lo := 0
-	hi := len(c.l) - 1
+	hi := len(c.list) - 1
 	for lo <= hi {
 		mid := lo + (hi-lo)/2
-		if c.compare(c.l[mid].key, key) == -1 {
+		if c.compare(c.list[mid].key, key) == -1 {
 			lo = mid + 1
-		} else if c.compare(c.l[mid].key, key) == 1 {
+		} else if c.compare(c.list[mid].key, key) == 1 {
 			hi = mid - 1
 		} else {
 			c.curr = int64(mid)
-			return c.l[mid].index
+			return c.list[mid].index
 		}
 	}
 	c.curr = -1
@@ -336,11 +334,11 @@ func (c *iCursor) Find(key []any) int64 {
 
 // Next returns the next element in the cursor
 func (c *iCursor) Next() int64 {
-	if c.curr == int64(len(c.l)-1) {
+	if c.curr == int64(len(c.list)-1) {
 		return -1
 	}
 	c.curr++
-	return c.l[c.curr].index
+	return c.list[c.curr].index
 }
 
 // Prev returns the previous element in the cursor
@@ -349,19 +347,19 @@ func (c *iCursor) Prev() int64 {
 		return -1
 	}
 	c.curr--
-	return c.l[c.curr].index
+	return c.list[c.curr].index
 }
 
 // First returns the first element in the cursor
 func (c *iCursor) First() int64 {
 	c.curr = 0
-	return c.l[c.curr].index
+	return c.list[c.curr].index
 }
 
 // Last returns the last element in the cursor
 func (c *iCursor) Last() int64 {
-	c.curr = int64(len(c.l) - 1)
-	return c.l[c.curr].index
+	c.curr = int64(len(c.list) - 1)
+	return c.list[c.curr].index
 }
 
 // Get returns the current element in the cursor
@@ -369,55 +367,57 @@ func (c *iCursor) Get() int64 {
 	if c.curr == -1 {
 		return -1
 	}
-	return c.l[c.curr].index
+	return c.list[c.curr].index
 }
 
-// SeekBefore returns the index of the first element that is less than the key
+// SeekBefore returns the possition of the first element that is less than the key
 func (c *iCursor) SeekBefore(key []any) int64 {
 	// binary search
 	lo := 0
-	hi := len(c.l) - 1
+	hi := len(c.list) - 1
 	for lo <= hi {
 		mid := lo + (hi-lo)/2
-		if c.compare(c.l[mid].key, key) == -1 {
+		if c.compare(c.list[mid].key, key) == -1 {
 			lo = mid + 1
-		} else if c.compare(c.l[mid].key, key) == 1 {
+		} else if c.compare(c.list[mid].key, key) == 1 {
 			hi = mid - 1
 		} else {
-			c.curr = int64(mid)
-			return c.l[mid].index
+			c.curr = int64(mid) - 1
+			return c.curr
 		}
 	}
-	if lo == 0 {
+	if hi == -1 {
 		c.curr = -1
 		return -1
 	}
-	c.curr = int64(lo - 1)
-	return c.l[lo-1].index
+
+	c.curr = int64(hi)
+	return c.curr
 }
 
 // SeekAfter returns the index of the first element that is greater than the key
 func (c *iCursor) SeekAfter(key []any) int64 {
 	// binary search
 	lo := 0
-	hi := len(c.l) - 1
+	hi := len(c.list) - 1
 	for lo <= hi {
 		mid := lo + (hi-lo)/2
-		if c.compare(c.l[mid].key, key) == -1 {
+		if c.compare(c.list[mid].key, key) == -1 {
 			lo = mid + 1
-		} else if c.compare(c.l[mid].key, key) == 1 {
+		} else if c.compare(c.list[mid].key, key) == 1 {
 			hi = mid - 1
 		} else {
-			c.curr = int64(mid)
-			return c.l[mid].index
+			c.curr = int64(mid) + 1
+			return c.curr
 		}
 	}
-	if lo == len(c.l) {
-		c.curr = -1
-		return -1
+	if lo == len(c.list) {
+		c.curr = int64(len(c.list))
+		return c.curr
 	}
-	c.curr = int64(lo)
-	return c.l[lo].index
+
+	c.curr = int64(lo) + 1
+	return c.curr
 }
 
 // SeekBeforeFirst sets the cursor before the first element
@@ -428,7 +428,7 @@ func (c *iCursor) SeekBeforeFirst() int64 {
 
 // SeekAfterLast sets the cursor after the last element
 func (c *iCursor) SeekAfterLast() int64 {
-	c.curr = int64(len(c.l))
+	c.curr = int64(len(c.list))
 	return -1
 }
 
