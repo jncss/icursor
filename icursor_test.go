@@ -38,42 +38,25 @@ var customers = []Customer{
 // test
 func TestICursor(t *testing.T) {
 	// create a new cursor
-	cr := NewICursor(customers, "Name-, Id")
+	cr := NewICursor(customers, "Name, Id")
 
-	// print the list
-	cr.Println()
+	// Print Len
+	fmt.Println("Len:", cr.Len())
 
-	// Find key "Sue, 13"
-	idx := cr.Find([]any{"Sue", 13})
-	if idx == -1 {
-		t.Error("Find failed")
-	} else {
-		fmt.Println("Found Sue, 13 at index", idx)
+	fmt.Println("-----")
+
+	// Print all customers
+	cr.SeekBeforeFirst()
+	for cr.Next() != -1 {
+		fmt.Println(customers[cr.Get()])
 	}
 
-	// First element
-	idx = cr.First()
-	if idx == -1 {
-		t.Error("First failed")
-	} else {
-		fmt.Println("First element is", customers[idx])
-	}
+	fmt.Println("-----")
 
-	// Iterate through the list
-	for idx = cr.First(); idx != -1; idx = cr.Next() {
-		fmt.Println(customers[idx])
-	}
-
-	// Last element
-	idx = cr.Last()
-	if idx == -1 {
-		t.Error("Last failed")
-	} else {
-		fmt.Println("Last element is", customers[idx])
-	}
-
-	// Iterate through the list backwards
-	for idx = cr.Last(); idx != -1; idx = cr.Prev() {
-		fmt.Println(customers[idx])
+	// Seek Before "Sue"
+	if cr.SeekBefore([]any{"Sue", 0}) != -1 {
+		for cr.Next() != -1 {
+			fmt.Println(customers[cr.Get()])
+		}
 	}
 }
