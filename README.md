@@ -1,5 +1,5 @@
 # icursor
-Indexed cursor to search data or iterate, in an ordered manner, in segments/array of golang structures. It allows
+Indexed cursor to search data or iterate, in an ordered manner, over slice/array of golang struct's. It allows
  multiple keys, indexed ascending or descending.
 
 
