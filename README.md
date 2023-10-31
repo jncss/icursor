@@ -90,7 +90,8 @@ func main() {
 
 ### API:
 ```golang
-// New indexed cursor. "keys" are comma separated field names. If a key ends with a minus sign, it is a descending key.
+// New indexed cursor. "keys" are comma separated field names. 
+// If a key ends with a minus sign, it is a descending key.
 New(data any, keys string) *iCursor
 
 // Len returns the number of elements in the cursor
