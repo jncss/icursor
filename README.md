@@ -87,3 +87,45 @@ func main() {
 ----------
 14      James                   14      12345671
 ```
+
+### API:
+```golang
+// New indexed cursor. "keys" are comma separated field names. If a key ends with a minus sign, it is a descending key.
+New(data any, keys string) *iCursor
+
+// Len returns the number of elements in the cursor
+(c *iCursor) Len() int
+
+// Find returns the index of the first element that matches the key
+(c *iCursor) Find(key []any) int64
+
+// Next returns the next element in the cursor
+(c *iCursor) Next() int64
+
+// Prev returns the previous element in the cursor
+(c *iCursor) Prev() int64
+
+// First returns the first element in the cursor
+(c *iCursor) First() int64
+
+// Last returns the last element in the cursor
+(c *iCursor) Last() int64
+
+// Get returns the current element in the cursor
+(c *iCursor) Get() int64
+
+// SeekBefore returns the possition of the first element that is less than the key
+func (c *iCursor) SeekBefore(key []any) int64
+
+// SeekAfter returns the index of the first element that is greater than the key
+func (c *iCursor) SeekAfter(key []any) int64
+
+// SeekBeforeFirst sets the cursor before the first element
+func (c *iCursor) SeekBeforeFirst() int64
+
+// SeekAfterLast sets the cursor after the last element
+func (c *iCursor) SeekAfterLast() int64
+
+// Seek returns the index of the first element that matches the key
+func (c *iCursor) Seek(key []any) int64
+```

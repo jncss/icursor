@@ -22,7 +22,7 @@ type iCursor struct {
 	curr int64
 }
 
-// New indexed cursor
+// New indexed cursor. "keys" are comma separated field names. If a key ends with a minus sign, it is a descending key.
 func New(data any, keys string) *iCursor {
 	// check if data is an array or slice
 	if reflect.TypeOf(data).Kind() != reflect.Slice && reflect.TypeOf(data).Kind() != reflect.Array {
