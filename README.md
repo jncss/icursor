@@ -46,7 +46,7 @@ var customers = []Customer{
 func main() {
 	// Create a new icursor
 	// Sort by Name (ascending) and Age (descending)
-	ic := icursor.NewICursor(customers, "Name, Age-")
+	ic := icursor.New(customers, "Name, Age-")
 
 	// Print all customers
 	ic.SeekBeforeFirst()
