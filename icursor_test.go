@@ -40,7 +40,7 @@ var customers = []Customer{
 // test
 func TestICursor(t *testing.T) {
 	// // create a new cursor
-	// ic := NewICursor(customers, "Name, Id")
+	// ic := New(customers, "Name, Id")
 
 	// // Print Len
 	// fmt.Println("Len:", ic.Len())
@@ -73,7 +73,7 @@ func TestICursor(t *testing.T) {
 	}
 
 	// create a new cursor
-	ic2 := NewICursor(customers, "Name")
+	ic2 := New(customers, "Name")
 
 	totalTime := time.Since(now)
 	fmt.Println("Total time to sort 1000000 customers:", totalTime)

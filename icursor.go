@@ -23,7 +23,7 @@ type iCursor struct {
 }
 
 // New indexed cursor
-func NewICursor(data any, keys string) *iCursor {
+func New(data any, keys string) *iCursor {
 	// check if data is an array or slice
 	if reflect.TypeOf(data).Kind() != reflect.Slice && reflect.TypeOf(data).Kind() != reflect.Array {
 		panic("Data must be an array or slice")
