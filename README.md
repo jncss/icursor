@@ -8,7 +8,7 @@ Indexed cursor to search data or iterate, in an ordered manner, over slice/array
 go get github.com/jncss/icursor
 ```
 ## Example:
-```
+```golang
 package main
 
 import (
@@ -58,10 +58,11 @@ func main() {
 	fmt.Println("----------")
 
 	// Search for key "James" age 14
-	ic.Find([]any{"James", 14})
-	if ic.Get() != -1 {
+	if ic.Find([]any{"James", 14}) != -1 {
 		c := customers[ic.Get()]
 		fmt.Printf("%d\t%-20s\t%d\t%s\n", c.ID, c.Name, c.Age, c.Phone)
+	} else {
+		fmt.Println("Not found")
 	}
 }
 ```
