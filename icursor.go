@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"sort"
 	"strings"
+	"time"
 )
 
 type icNode struct {
@@ -286,6 +287,22 @@ func (c *iCursor) compare(key1, key2 []any) int {
 						return -1
 					}
 					if key1[k].(string) > key2[k].(string) {
+						return 1
+					}
+				}
+			case time.Time:
+				if c.keys[k].desc {
+					if key1[k].(time.Time).After(key2[k].(time.Time)) {
+						return -1
+					}
+					if key1[k].(time.Time).Before(key2[k].(time.Time)) {
+						return 1
+					}
+				} else {
+					if key1[k].(time.Time).Before(key2[k].(time.Time)) {
+						return -1
+					}
+					if key1[k].(time.Time).After(key2[k].(time.Time)) {
 						return 1
 					}
 				}
